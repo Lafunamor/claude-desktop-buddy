@@ -104,6 +104,27 @@ pio run -e geekmagic-smalltv-pro-ota -t upload   # flashes over the air
 Set `upload_port` in the `geekmagic-smalltv-pro-ota` env to the device's IP
 or `<hostname>.local`. No serial adapter, ever again.
 
+## Status / known issues (as of first hardware bring-up)
+
+The firmware was flashed to a real SmallTV Pro **over the air**, by pushing
+`firmware.bin` from the board's existing ESPHome via ESPHome OTA (port 3232).
+That part worked: ESPHome was replaced, the image booted, and the backlight
+(GPIO5 PWM) lit. Two issues remain, both needing a serial console to debug:
+
+1. **Display blank** — backlight on, nothing rendered. The panel likely needs
+   a non-standard ST7789 init (the ESPHome config used a *custom* driver with
+   `spi_mode3`). Things to try with serial logs in hand: SPI mode, toggling
+   `TFT_INVERSION_ON/OFF`, a CGRAM offset, and confirming `Lcd.init()` output.
+2. **WiFi not associating** — credentials are correct (same 2.4 GHz network),
+   so this was almost certainly the BLE+WiFi coexistence ordering: modem-sleep
+   was enabled before association. **Fixed in `net.cpp`** (associate with sleep
+   off, enable it only after the link is up) but not yet re-flashed.
+
+Because the running image can't get on WiFi, OTA is unavailable, so recovery
+needs a **USB-to-serial adapter** (ordered). With serial we get the boot log,
+can flash freely, and can iterate the display config. Consider also adding a
+SoftAP/captive-portal fallback so a future WiFi miss can't lock the device out.
+
 ## If the display looks wrong
 
 ST7789 panels vary in color order and inversion. Adjust these flags in the
