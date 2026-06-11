@@ -1,4 +1,4 @@
-#include <M5StickCPlus.h>
+#include "hal.h"
 #include <LittleFS.h>
 #include <stdarg.h>
 #include "ble_bridge.h"
@@ -20,6 +20,17 @@ static void startBt() {
 
 #include "character.h"
 #include "stats.h"
+
+// Where the 135-wide sprite lands on the panel. The M5StickC Plus panel is
+// exactly 135 wide so it sits at 0; wider panels (e.g. SmallTV Pro 240) set
+// these in their HAL shim to center it.
+#ifndef PUSH_X
+#define PUSH_X 0
+#endif
+#ifndef PUSH_Y
+#define PUSH_Y 0
+#endif
+
 const int W = 135, H = 240;
 const int CX = W / 2;
 const int CY_BASE = 120;
@@ -978,7 +989,7 @@ void setup() {
       spr.drawString("a buddy appears", W/2, H/2 + 12);
     }
     spr.setTextDatum(TL_DATUM); spr.setTextSize(1);
-    spr.pushSprite(0, 0);
+    spr.pushSprite(PUSH_X, PUSH_Y);
     delay(1800);
   }
 
@@ -1226,7 +1237,7 @@ void loop() {
     if (resetOpen) drawReset();
     else if (settingsOpen) drawSettings();
     else if (menuOpen) drawMenu();
-    spr.pushSprite(0, 0);
+    spr.pushSprite(PUSH_X, PUSH_Y);
   }
 
   // Face-down nap: dim immediately, pause animations, accumulate sleep time.

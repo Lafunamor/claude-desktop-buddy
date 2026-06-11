@@ -27,6 +27,11 @@ depends on the M5StickCPlus library for its display, IMU, and button
 drivers—so you'll need that board, or a fork that swaps those drivers for
 your own pin layout.
 
+> **GeekMagic SmallTV Pro:** a port for this cheap ESP32 + 240×240 ST7789
+> board is included — build the `geekmagic-smalltv-pro` env. See
+> **[docs/geekmagic-smalltv-pro.md](docs/geekmagic-smalltv-pro.md)** for the
+> pin map, the single-touch gesture scheme, and flashing notes.
+
 ## Flashing
 
 Install
