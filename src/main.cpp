@@ -4,6 +4,7 @@
 #include "ble_bridge.h"
 #include "data.h"
 #include "buddy.h"
+#include "net.h"   // WiFi + OTA (no-op unless BUDDY_WIFI)
 
 TFT_eSprite spr = TFT_eSprite(&M5.Lcd);
 
@@ -994,11 +995,14 @@ void setup() {
   }
 
   Serial.printf("buddy: %s\n", buddyMode ? "ASCII mode" : "GIF character loaded");
+
+  netInit();   // bring up WiFi + OTA listener (no-op unless BUDDY_WIFI)
 }
 
 void loop() {
   M5.update();
   M5.Beep.update();
+  netLoop();   // service OTA (no-op unless BUDDY_WIFI)
   t++;
   uint32_t now = millis();
 

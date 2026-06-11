@@ -63,18 +63,46 @@ The build defaults to capacitive touch on **GPIO32**. If tapping does nothing:
 3. If your pad is wired as a plain digital button to GND, build with
    `-DBUDDY_TOUCH_DIGITAL=1` (uses `INPUT_PULLUP`, active-low).
 
-## Building & flashing
+## WiFi + over-the-air updates
 
+The ESP32-WROOM-32 has **no USB hardware** and the board has **no USB-serial
+chip**, so the USB-C port is power-only — the device can never be flashed
+over USB. To avoid needing a serial adapter for every update, the firmware
+brings up WiFi and an **ArduinoOTA** listener (enabled by `-DBUDDY_WIFI`).
+After it's running once, every later flash is wireless.
+
+1. Copy `src/geekmagic/wifi_secrets.example.h` to
+   `src/geekmagic/wifi_secrets.h` (gitignored) and fill in your SSID /
+   password. Without it the firmware still builds and runs, just BLE-only.
+2. WiFi and BLE share the one 2.4 GHz radio (modem-sleep coexistence), so
+   the link to Claude Desktop keeps working.
+
+## Flashing
+
+### First time — you need to get the firmware on once
+
+Pick whichever you can do:
+
+- **Serial** (cleanest, reversible): 3.3 V USB-serial adapter on the UART
+  pads. Bridge `GPIO0 -> GND` while powering on to enter the bootloader, then:
+  ```sh
+  pio run -e geekmagic-smalltv-pro -t upload
+  pio run -e geekmagic-smalltv-pro -t uploadfs   # /characters GIFs (optional)
+  ```
+- **OTA from existing ESPHome firmware** (no serial): if the board currently
+  runs ESPHome, push `firmware.bin` once via ESPHome's OTA (port 3232, using
+  your ESPHome `ota:` password). Note: ESPHome's partition table has no
+  LittleFS partition, so GIF characters won't load until a serial `uploadfs`
+  — the ASCII pet works regardless.
+
+### Every time after — wireless
+
+Once this firmware is running and on WiFi:
 ```sh
-# enter the bootloader: bridge GPIO0 -> GND while powering on via the
-# UART pads, then release. (Pads: GND, TXD0, RXD0, 3V3, GPIO0, RST.)
-pio run -e geekmagic-smalltv-pro -t upload          # firmware
-pio run -e geekmagic-smalltv-pro -t uploadfs        # /characters GIFs (optional)
-pio device monitor -e geekmagic-smalltv-pro         # serial log
+pio run -e geekmagic-smalltv-pro-ota -t upload   # flashes over the air
 ```
-
-You'll need a USB-to-serial (3.3 V) adapter on the SmallTV Pro's UART pads —
-the board's USB port is power-only.
+Set `upload_port` in the `geekmagic-smalltv-pro-ota` env to the device's IP
+or `<hostname>.local`. No serial adapter, ever again.
 
 ## If the display looks wrong
 

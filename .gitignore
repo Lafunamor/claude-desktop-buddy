@@ -2,3 +2,6 @@
 .vscode/
 .DS_Store
 data/
+
+# local WiFi credentials (never commit)
+src/geekmagic/wifi_secrets.h
